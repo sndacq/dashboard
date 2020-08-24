@@ -15,7 +15,7 @@ def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
-    except Error as e:
+    except Exception as e:
         print(e)
 
     return conn
@@ -47,35 +47,25 @@ def create_running_balance(data):
     
     df['ZMONEY'] = df['ZMONEY'].apply(pd.to_numeric)
 
+    df.loc[df['DO_TYPE'] == '1', ['ZMONEY']] = df * -1
+    df.loc[df['DO_TYPE'] == '3', ['ZMONEY']] = 0
+    df.loc[df['DO_TYPE'] == '4', ['ZMONEY']] = 0
 
-    df.loc[df['DO_TYPE'] == '1', ['ZMONEY']] = df * -1 
-    df.loc[df['DO_TYPE'] == '3', ['ZMONEY']] = 0 
-    df.loc[df['DO_TYPE'] == '4', ['ZMONEY']] = 0 
+    grouped = df.groupby(['WDATE'], as_index = False).agg('sum')
 
-    ''' TODO: create new dataframe with running balance
-        dataframe columns
-        assetname
-    ''' 
+    # grouped = df.groupby(['WDATE'], as_index = False).agg(
+    #     lambda x : x.sum() if x.dtype=='float64' else ','.join(x)
+    # )
+    # print(running_balance.nlargest(5))
 
-    print(df)
+    running_balance = grouped['ZMONEY'].cumsum()
+    grouped['Running balance'] = running_balance
 
-    # wasd = df.groupby(['WDATE'], as_index = False).agg('sum')
-    # print(wasd)
-
-    running_balance = df['ZMONEY'].cumsum()
-    print(running_balance)
-    print(np.max(running_balance))
-    print(np.min(running_balance))
+    return grouped[-50:]
 
 def main():
     raw_data = get_raw_data()
     create_running_balance(raw_data)
 
-
-
 if __name__ == "__main__":
     main()
-
-
-
-
