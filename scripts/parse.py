@@ -1,9 +1,9 @@
-import sqlite3
+import sqlite3, pathlib, os
 import numpy as np
 import pandas as pd
 
-
-DB_FILE = 'MoneyManagerBackup'
+dirname = pathlib.Path(__file__).parent.absolute()
+DB_FILE = os.path.join(dirname, 'MoneyManagerBackup')
 
 def create_connection(db_file):
     """ create a database connection to the SQLite database
@@ -61,11 +61,9 @@ def create_running_balance(data):
     running_balance = grouped['ZMONEY'].cumsum()
     grouped['Running balance'] = running_balance
 
-    return grouped[-50:]
+    return grouped[-50:].to_json(orient="split")
+    
 
-def main():
+def get_clean_data():
     raw_data = get_raw_data()
-    create_running_balance(raw_data)
-
-if __name__ == "__main__":
-    main()
+    return create_running_balance(raw_data)
