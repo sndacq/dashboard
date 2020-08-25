@@ -61,7 +61,7 @@ def create_running_balance(data):
     running_balance = grouped['ZMONEY'].cumsum()
     grouped['Running balance'] = running_balance
 
-    return grouped[-50:].to_json(orient="split")
+    return grouped[-50:].to_json()
     
 
 def get_clean_data():
