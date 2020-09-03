@@ -28,21 +28,28 @@ def expense(request, expense_id=None):
 
 def get_expense(request, expense_id):
     try:
+        expense_list = []
         if expense_id:
-            expense_objects = Expense.objects.get(pk=expense_id)
+            expense = Expense.objects.get(pk=expense_id)
+            expense_list.append({
+                'id': expense.pk,
+                'date': expense.date,
+                'amount': expense.amount,
+                'expense_type': expense.expense_type,
+                'account': expense.account.pk,
+                'category': expense.category.pk,
+            })   
         else:
             expense_objects = Expense.objects.all()
-
-        expense_list = []
-        for entry in expense_objects:
-            expense_list.append({
-                'id': entry.pk,
-                'date': entry.date,
-                'amount': entry.amount,
-                'expense_type': entry.expense_type,
-                'account': entry.account.pk,
-                'category': entry.category.pk,
-            })
+            for entry in expense_objects:
+                expense_list.append({
+                    'id': entry.pk,
+                    'date': entry.date,
+                    'amount': entry.amount,
+                    'expense_type': entry.expense_type,
+                    'account': entry.account.pk,
+                    'category': entry.category.pk,
+                })
         return JsonResponse(expense_list, safe=False)
     except Exception as error:
         print(error)
@@ -79,7 +86,7 @@ def create_expense(request):
 
         except Exception as error:
             print(error)
-            raise HttpResponseBadRequest('Unable to create entry')
+            return HttpResponseBadRequest('Unable to create entry')
     else:
         return HttpResponseBadRequest('Invalid form data')
 
