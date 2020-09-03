@@ -2,6 +2,7 @@ from django.shortcuts import HttpResponse
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django import forms
+from rest_framework.decorators import api_view
 
 from scripts import parse
 from .models import Expense, Account, Category
@@ -18,6 +19,12 @@ def expense(request, expense_id=None):
 
     elif request.method == 'POST':
         return create_expense(request)
+
+    elif request.method == 'DELETE':
+        return delete_expense(request, expense_id)
+
+    else:
+        raise Http404('Invalid Request Method')
 
 def get_expense(request, expense_id):
     try:
@@ -37,7 +44,8 @@ def get_expense(request, expense_id):
                 'category': entry.category.pk,
             })
         return JsonResponse(expense_list, safe=False)
-    except:
+    except Exception as error:
+        print(error)
         raise Http404('Entry not found')
 
 
@@ -50,7 +58,6 @@ class ExpenseValidationForm(forms.Form):
 
 
 # TODO: figure out csrf on postman
-
 def create_expense(request):
     entry = ExpenseValidationForm(request.POST or None)
     if entry.is_valid():
@@ -72,6 +79,20 @@ def create_expense(request):
 
         except Exception as error:
             print(error)
-            return HttpResponseBadRequest('Unable to create entry')
+            raise HttpResponseBadRequest('Unable to create entry')
     else:
         return HttpResponseBadRequest('Invalid form data')
+
+def delete_expense(request, expense_id):
+    if expense_id:
+        try:
+            expense = Expense.objects.get(pk=expense_id)
+            expense.delete()
+            return HttpResponse('Succesfully deleted entry')
+
+        except Exception as error:
+            print(error)
+            raise Http404('Entry not found')
+
+    else:
+        raise Http404('Entry not found')
