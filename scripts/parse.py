@@ -39,7 +39,7 @@ def create_running_balance(data):
     ''' DO_TYPE
         0 = Income
         1 = Expenses
-        3 = Tranfer
+        3 = Transfer
         4 = Savings/Investments
     '''
     columns = ['assetUID', 'categoryUID', 'ZMONEY', 'DO_TYPE', 'WDATE']
