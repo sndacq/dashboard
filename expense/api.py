@@ -1,12 +1,21 @@
 from django.shortcuts import HttpResponse
 from django.http import Http404, JsonResponse,HttpResponseBadRequest
-from django.http.multipartparser import MultiPartParser
 from django.views.decorators.csrf import csrf_exempt
 from django import forms
 from rest_framework.decorators import api_view
 
 from scripts import parse
 from .models import Expense, Account, Category
+
+import json
+
+
+class ExpenseValidationForm(forms.Form):
+    date = forms.DateTimeField()
+    amount = forms.DecimalField()
+    account = forms.IntegerField()
+    category = forms.IntegerField()
+    expense_type = forms.IntegerField()
 
 
 def index(request):
@@ -22,7 +31,7 @@ def expense(request, expense_id=None):
         return create_expense(request)
 
     elif request.method == 'PUT':
-        return update_expense(request, expense_id)
+        return update_expense(request)
 
     elif request.method == 'DELETE':
         return delete_expense(request, expense_id)
@@ -61,30 +70,20 @@ def get_expense(request, expense_id):
 
 # TODO: figure out csrf on postman
 def create_expense(request):
-
-
-    class ExpenseValidationForm(forms.Form):
-        date = forms.DateTimeField()
-        amount = forms.DecimalField()
-        account = forms.IntegerField()
-        category = forms.IntegerField()
-        expense_type = forms.IntegerField()
-
-
-    entry = ExpenseValidationForm(request.POST or None)
+    form_data = json.loads(request.body)
+    entry = ExpenseValidationForm(form_data or None)
+ 
     if entry.is_valid():
         try:
-            request_body = request.POST
-
-            entry_account = Account.objects.get(pk=request_body['account'])
-            entry_category = Category.objects.get(pk=request_body['category'])
+            entry_account = Account.objects.get(pk=form_data['account'])
+            entry_category = Category.objects.get(pk=form_data['category'])
 
             e = Expense(
-                date = request_body['date'],
-                amount = request_body['amount'],
+                date = form_data['date'],
+                amount = form_data['amount'],
                 account = entry_account,
                 category = entry_category,
-                expense_type = request_body['expense_type']
+                expense_type = form_data['expense_type']
             )
             e.save()
             return JsonResponse({"id": e.pk})
@@ -95,20 +94,23 @@ def create_expense(request):
     else:
         return HttpResponseBadRequest('Invalid form data')
 
-def update_expense(request, expense_id):
-    if expense_id:
-        try:
-            request_body = MultiPartParser(request.META, request, request.upload_handlers).parse()
-            request_body = request_body[0]
+#TODO: validate if data has id
+def update_expense(request):
+    form_data = json.loads(request.body)
+    entry = ExpenseValidationForm(form_data or None)
 
-            entry_account = Account.objects.get(pk=request_body['account'])
-            entry_category = Category.objects.get(pk=request_body['category'])
-            expense = Expense.objects.get(pk=expense_id)
-            expense.date = request_body['date']
-            expense.amount = request_body['amount']
+    if entry.is_valid():
+        try:
+            entry_account = Account.objects.get(pk=form_data['account'])
+            entry_category = Category.objects.get(pk=form_data['category'])
+
+            expense = Expense.objects.get(pk=form_data['id'])
+
+            expense.date = form_data['date']
+            expense.amount = form_data['amount']
             expense.account = entry_account
             expense.category = entry_category
-            expense.expense_type = request_body['expense_type']
+            expense.expense_type = form_data['expense_type']
             expense.save()
 
             return JsonResponse({
@@ -125,7 +127,7 @@ def update_expense(request, expense_id):
             raise Http404('Unable to update entry')
 
     else:
-        raise Http404('Entry not found')
+        return HttpResponseBadRequest('Invalid form data')
 
 def delete_expense(request, expense_id):
     if expense_id:
