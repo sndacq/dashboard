@@ -25,7 +25,7 @@ class Expense(models.Model):
         TRANSFER = 3
         SAVINGS = 4
 
-    date = models.DateTimeField('entry date')
+    date = models.DateField('entry date')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
