@@ -59,7 +59,7 @@ def get_expense(request, expense_id):
                 },
             })  
         else:
-            expense_objects = Expense.objects.all()
+            expense_objects = Expense.objects.all().order_by('-date')
             for entry in expense_objects:
                 expense_list.append({
                     'id': entry.pk,
