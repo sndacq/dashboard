@@ -49,9 +49,15 @@ def get_expense(request, expense_id):
                 'date': expense.date,
                 'amount': expense.amount,
                 'expense_type': expense.expense_type,
-                'account': expense.account.pk,
-                'category': expense.category.pk,
-            })   
+                'account': {
+                    'id' : expense.account.pk,
+                    'name' : expense.account.account_name,
+                },
+                'category': {
+                    'id' : expense.category.pk,
+                    'name' : expense.category.category_name,
+                },
+            })  
         else:
             expense_objects = Expense.objects.all()
             for entry in expense_objects:
@@ -60,8 +66,14 @@ def get_expense(request, expense_id):
                     'date': entry.date,
                     'amount': entry.amount,
                     'expense_type': entry.expense_type,
-                    'account': entry.account.pk,
-                    'category': entry.category.pk,
+                    'account': {
+                        'id' : entry.account.pk,
+                        'name' : entry.account.account_name,
+                    },
+                    'category': {
+                        'id' : entry.category.pk,
+                        'name' : entry.category.category_name,
+                    },
                 })
         return JsonResponse(expense_list, safe=False)
     except Exception as error:
