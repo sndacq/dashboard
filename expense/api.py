@@ -49,14 +49,8 @@ def get_expense(request, expense_id):
                 'date': expense.date,
                 'amount': expense.amount,
                 'expense_type': expense.expense_type,
-                'account': {
-                    'id' : expense.account.pk,
-                    'name' : expense.account.account_name,
-                },
-                'category': {
-                    'id' : expense.category.pk,
-                    'name' : expense.category.category_name,
-                },
+                'account': expense.account.pk,
+                'category': expense.category.pk,
             })  
         else:
             expense_objects = Expense.objects.all().order_by('-date')
@@ -66,14 +60,8 @@ def get_expense(request, expense_id):
                     'date': entry.date,
                     'amount': entry.amount,
                     'expense_type': entry.expense_type,
-                    'account': {
-                        'id' : entry.account.pk,
-                        'name' : entry.account.account_name,
-                    },
-                    'category': {
-                        'id' : entry.category.pk,
-                        'name' : entry.category.category_name,
-                    },
+                    'account': entry.account.pk,
+                    'category': entry.category.pk,
                 })
         return JsonResponse(expense_list, safe=False)
     except Exception as error:
@@ -154,3 +142,38 @@ def delete_expense(request, expense_id):
 
     else:
         raise Http404('Entry not found')
+
+def category(request):
+    if request.method == 'GET':
+        try:
+            category_list = []
+            category_objects = Category.objects.all()
+            for category in category_objects:
+                category_list.append({
+                    'id': category.pk,
+                    'name': category.category_name,
+                })
+            return JsonResponse(category_list, safe=False)
+
+        except Exception as error:
+            print(error)
+            raise Http404('No categories found')
+    else:
+        raise Http404('Invalid Request Method')
+
+def account(request):
+    if request.method == 'GET':
+        try:
+            account_list = []
+            account_objects = Account.objects.all()
+            for account in account_objects:
+                account_list.append({
+                    'id': account.pk,
+                    'name': account.account_name,
+                })
+            return JsonResponse(account_list, safe=False)
+        except Exception as error:
+            print(error)
+            raise Http404('No accounts found')
+    else:
+        raise Http404('Invalid Request Method')
