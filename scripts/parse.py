@@ -1,9 +1,10 @@
 import sqlite3
 import numpy as np
 import pandas as pd
+import sys
 
 
-DB_FILE = 'MoneyManagerBackup'
+DB_FILE = sys.argv[1] or 'MoneyManagerBackup'
 
 def create_connection(db_file):
     """ create a database connection to the SQLite database
@@ -15,7 +16,7 @@ def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
-    except Error as e:
+    except ConnectionError as e:
         print(e)
 
     return conn

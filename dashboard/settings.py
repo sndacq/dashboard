@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'polls.apps.PollsConfig',
+    'rest_framework',
+    'drf_yasg',
+    'expense',
 ]
 
 MIDDLEWARE = [
@@ -76,12 +78,9 @@ WSGI_APPLICATION = 'dashboard.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': '127.0.0.1',
-        'PORT': os.environ.get('POSTGRES_PORT'),
+        'ENGINE': 'djongo',
+        'NAME': 'dashboard',
+        'ENFORCE_SCHEMA': False,
     }
 }
 
