@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import Entry, Account, Category
 
 
+class IDParamSerializer(serializers.Serializer):
+    id = serializers.CharField(help_text="entry id")
+
 class EntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Entry
